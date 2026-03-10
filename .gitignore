@@ -69,3 +69,8 @@ proxmox-config/config.json
 # Build/Lock files
 uv.lock
 .agent/
+
+# Proxmox MCP Local Config and Logs
+proxmox-config/config.json
+proxmox_mcp.log
+server_debug.log

@@ -3,7 +3,7 @@ name = "proxmox-mcp-plus"
 version = "0.1.0"
 description = "Enhanced Proxmox MCP Server"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 dependencies = [
     "mcp>=1.2.0",
     "proxmoxer>=2.0.1",

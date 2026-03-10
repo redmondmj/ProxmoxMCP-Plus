@@ -59,6 +59,8 @@ class ContainerConsoleManager:
             port=self.ssh_cfg.port,
             username=self.ssh_cfg.user,
             timeout=10,
+            look_for_keys=False,
+            allow_agent=False,
         )
         if self.ssh_cfg.key_file:
             connect_kwargs["key_filename"] = self.ssh_cfg.key_file

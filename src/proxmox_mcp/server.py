@@ -205,24 +205,18 @@ class ProxmoxMCPServer:
         def get_cluster_status():
             return self.cluster_tools.get_cluster_status()
 
-        # Containers (LXC)
-        class GetContainersPayload(BaseModel):
-            node: Optional[str] = Field(None, description="Optional node name (e.g. 'pve1')")
-            include_stats: bool = Field(True, description="Include live stats and fallbacks")
-            include_raw: bool = Field(False, description="Include raw status/config")
-            format_style: Literal["pretty", "json"] = Field(
-                "pretty", description="'pretty' or 'json'"
-            )
-
         @self.mcp.tool(description=GET_CONTAINERS_DESC)
         def get_containers(
-            payload: GetContainersPayload = Body(..., embed=True, description="Container query options")
+            node: Annotated[Optional[str], Field(None, description="Optional node name (e.g. 'pve1')")] = None,
+            include_stats: Annotated[bool, Field(True, description="Include live stats and fallbacks")] = True,
+            include_raw: Annotated[bool, Field(False, description="Include raw status/config")] = False,
+            format_style: Annotated[Literal["pretty", "json"], Field("pretty", description="'pretty' or 'json'")] = "pretty",
         ):
             return self.container_tools.get_containers(
-                node=payload.node,
-                include_stats=payload.include_stats,
-                include_raw=payload.include_raw,
-                format_style=payload.format_style,
+                node=node,
+                include_stats=include_stats,
+                include_raw=include_raw,
+                format_style=format_style,
             )
 
         # Container controls
