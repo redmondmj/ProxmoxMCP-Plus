@@ -292,6 +292,98 @@ class VMTools(ProxmoxTool):
         except Exception as e:
             self._handle_error(f"create VM {vmid}", e)
 
+    def clone_vm(
+        self,
+        node: str,
+        vmid: str,
+        newid: str,
+        name: Optional[str] = None,
+        target: Optional[str] = None,
+        full: bool = True,
+        storage: Optional[str] = None,
+        format: Optional[str] = None,
+    ) -> List[Content]:
+        """Clone a new virtual machine from an existing VM or template.
+        
+        Args:
+            node: Host node where the source VM/template exists
+            vmid: Source VM/Template ID to clone from
+            newid: New VM ID for the clone
+            name: Name for the new VM (optional)
+            target: Target node for the clone (optional, defaults to source node)
+            full: Create a full clone instead of a linked clone (default: True)
+            storage: Target storage for the clone (optional)
+            format: Target disk format: 'raw', 'qcow2', 'vmdk' (optional)
+            
+        Returns:
+            List of Content objects containing cloning result
+            
+        Raises:
+            ValueError: If source VM/template is not found or new ID exists
+            RuntimeError: If cloning fails
+        """
+        try:
+            # Check if source VM exists
+            try:
+                source_config = self.proxmox.nodes(node).qemu(vmid).config.get()
+                source_name = source_config.get("name", f"VM-{vmid}")
+            except Exception as e:
+                if "does not exist" in str(e).lower() or "not found" in str(e).lower():
+                    raise ValueError(f"Source VM/Template {vmid} not found on node {node}")
+                raise e
+            
+            # Check if target ID already exists (across all nodes)
+            # This is a bit expensive but safer
+            all_vms = self.proxmox.cluster.resources.get(type="vm")
+            for vm in all_vms:
+                if str(vm["vmid"]) == str(newid):
+                    raise ValueError(f"Target VM ID {newid} already exists in the cluster")
+            
+            # Prepare cloning parameters
+            clone_params = {
+                "newid": newid,
+                "full": 1 if full else 0,
+            }
+            
+            if name:
+                clone_params["name"] = name
+            if target:
+                clone_params["target"] = target
+            if storage:
+                clone_params["storage"] = storage
+            if format:
+                clone_params["format"] = format
+                
+            # Perform the clone
+            task_result = self.proxmox.nodes(node).qemu(vmid).clone.post(**clone_params)
+            
+            clone_type = "Full" if full else "Linked"
+            target_node = target if target else node
+            
+            result_text = f"""🚀 VM Cloning initiated successfully!
+
+📋 Clone Details:
+  • Source: {source_name} (ID: {vmid})
+  • New VM: {name if name else 'Clone of ' + source_name} (ID: {newid})
+  • Type: {clone_type} Clone
+  • Source Node: {node}
+  • Target Node: {target_node}
+"""
+            if storage:
+                result_text += f"  • Target Storage: {storage}\n"
+            if format:
+                result_text += f"  • Disk Format: {format}\n"
+                
+            result_text += f"\n🔧 Task ID: {task_result}\n"
+            result_text += f"\n✅ VM {newid} is being created on node {target_node}"
+            
+            return [Content(type="text", text=result_text)]
+            
+        except ValueError as e:
+            raise e
+        except Exception as e:
+            self._handle_error(f"clone VM {vmid} to {newid}", e)
+
     def start_vm(self, node: str, vmid: str) -> List[Content]:
         """Start a virtual machine.
         

@@ -39,6 +39,21 @@ Examples:
 - Create VM with 1 CPU, 2GB RAM, 10GB disk: node='pve', vmid='200', name='test-vm', cpus=1, memory=2048, disk_size=10
 - Create VM with 2 CPUs, 4GB RAM, 20GB disk: node='pve', vmid='201', name='web-server', cpus=2, memory=4096, disk_size=20"""
 
+CLONE_VM_DESC = """Clone a new virtual machine from an existing VM or template.
+
+Parameters:
+node* - Host node where the source VM/template exists (e.g. 'pve')
+vmid* - Source VM/Template ID to clone from (e.g. '100')
+newid* - New VM ID for the clone (e.g. '200')
+name - Name for the new VM (optional)
+target - Target node for the clone (optional, defaults to source node)
+full - Create a full clone instead of a linked clone (optional, default: true)
+storage - Target storage for the clone (optional)
+format - Target disk format: 'raw', 'qcow2', 'vmdk' (optional)
+
+Example:
+Clone VM 100 to 200: node='pve', vmid='100', newid='200', name='my-clone'"""
+
 EXECUTE_VM_COMMAND_DESC = """Execute commands in a VM via QEMU guest agent.
 
 Parameters:

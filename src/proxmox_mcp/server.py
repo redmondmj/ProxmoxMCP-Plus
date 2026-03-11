@@ -42,6 +42,7 @@ from proxmox_mcp.tools.definitions import (
     GET_NODE_STATUS_DESC,
     GET_VMS_DESC,
     CREATE_VM_DESC,
+    CLONE_VM_DESC,
     EXECUTE_VM_COMMAND_DESC,
     START_VM_DESC,
     STOP_VM_DESC,
@@ -148,6 +149,21 @@ class ProxmoxMCPServer:
         ):
             return self.vm_tools.create_vm(
                 node, vmid, name, cpus, memory, disk_size, storage, ostype, network_bridge
+            )
+
+        @self.mcp.tool(description=CLONE_VM_DESC)
+        def clone_vm(
+            node: Annotated[str, Field(description="Host node where the source VM/template exists (e.g. 'pve')")],
+            vmid: Annotated[str, Field(description="Source VM/Template ID to clone from (e.g. '100')")],
+            newid: Annotated[str, Field(description="New VM ID for the clone (e.g. '200')")],
+            name: Annotated[Optional[str], Field(description="Name for the new VM (optional)", default=None)] = None,
+            target: Annotated[Optional[str], Field(description="Target node for the clone (optional, defaults to source node)", default=None)] = None,
+            full: Annotated[bool, Field(description="Create a full clone instead of a linked clone", default=True)] = True,
+            storage: Annotated[Optional[str], Field(description="Target storage for the clone (optional)", default=None)] = None,
+            format: Annotated[Optional[str], Field(description="Target disk format: 'raw', 'qcow2', 'vmdk' (optional)", default=None)] = None,
+        ):
+            return self.vm_tools.clone_vm(
+                node, vmid, newid, name, target, full, storage, format
             )
 
         @self.mcp.tool(description=EXECUTE_VM_COMMAND_DESC)

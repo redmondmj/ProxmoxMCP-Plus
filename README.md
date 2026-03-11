@@ -365,6 +365,33 @@ VM Configuration:
 Task ID: UPID:pve:001AB729:0442E853:682FF380:qmcreate:200:root@pam!mcp
 ```
 
+#### clone_vm 🆕
+Clone a new virtual machine from an existing VM or template.
+
+**Parameters:**
+- `node` (string, required): Host node where the source VM/template exists
+- `vmid` (string, required): Source VM/Template ID to clone from
+- `newid` (string, required): New VM ID for the clone
+- `name` (string, optional): Name for the new VM
+- `target` (string, optional): Target node for the clone (defaults to source node)
+- `full` (boolean, optional): Create a full clone instead of a linked clone (default: true)
+- `storage` (string, optional): Target storage for the clone
+- `format` (string, optional): Target disk format: 'raw', 'qcow2', 'vmdk'
+
+**API Endpoint:**
+```http
+POST /clone_vm
+Content-Type: application/json
+
+{
+    "node": "pve",
+    "vmid": "100",
+    "newid": "200",
+    "name": "my-clone",
+    "full": true
+}
+```
+
 #### VM Power Management
 
 **start_vm**: Start a virtual machine
