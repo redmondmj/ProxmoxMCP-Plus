@@ -162,9 +162,10 @@ class ProxmoxMCPServer:
             full: Annotated[bool, Field(description="Create a full clone instead of a linked clone", default=True)] = True,
             storage: Annotated[Optional[str], Field(description="Target storage for the clone (optional)", default=None)] = None,
             format: Annotated[Optional[str], Field(description="Target disk format: 'raw', 'qcow2', 'vmdk' (optional)", default=None)] = None,
+            network_bridge: Annotated[Optional[str], Field(description="New network bridge for the clone (optional)", default=None)] = None,
         ):
             return self.vm_tools.clone_vm(
-                node, vmid, newid, name, target, full, storage, format
+                node, vmid, newid, name, target, full, storage, format, network_bridge
             )
 
         @self.mcp.tool(description=EXECUTE_VM_COMMAND_DESC)

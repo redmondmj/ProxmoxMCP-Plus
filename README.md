@@ -379,6 +379,7 @@ Clone a new virtual machine from an existing VM or template.
 - `full` (boolean, optional): Create a full clone instead of a linked clone (default: true)
 - `storage` (string, optional): Target storage for the clone
 - `format` (string, optional): Target disk format: 'raw', 'qcow2', 'vmdk'
+- `network_bridge` (string, optional): New network bridge for the clone 🆕
 
 **API Endpoint:**
 ```http
@@ -390,7 +391,8 @@ Content-Type: application/json
     "vmid": "100",
     "newid": "200",
     "name": "my-clone",
-    "full": true
+    "full": true,
+    "network_bridge": "vmbr2"
 }
 ```
 

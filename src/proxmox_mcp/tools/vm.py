@@ -333,6 +333,7 @@ class VMTools(ProxmoxTool):
         full: bool = True,
         storage: Optional[str] = None,
         format: Optional[str] = None,
+        network_bridge: Optional[str] = None,
     ) -> List[Content]:
         """Clone a new virtual machine from an existing VM or template.
         
@@ -345,6 +346,7 @@ class VMTools(ProxmoxTool):
             full: Create a full clone instead of a linked clone (default: True)
             storage: Target storage for the clone (optional)
             format: Target disk format: 'raw', 'qcow2', 'vmdk' (optional)
+            network_bridge: New network bridge for the clone (optional)
             
         Returns:
             List of Content objects containing cloning result
@@ -388,6 +390,21 @@ class VMTools(ProxmoxTool):
             # Perform the clone
             task_result = self.proxmox.nodes(node).qemu(vmid).clone.post(**clone_params)
             
+            # If network_bridge is specified, wait for clone to finish then update config
+            if network_bridge:
+                target_node = target if target else node
+                self._wait_for_task(target_node, task_result)
+                try:
+                    # Give Proxmox a moment to stabilize config after clone
+                    import time
+                    time.sleep(1)
+                    update_config = {
+                        "net0": f"virtio,bridge={network_bridge}"
+                    }
+                    self.proxmox.nodes(target_node).qemu(newid).config.post(**update_config)
+                except Exception as e:
+                    self.logger.error(f"Failed to update network bridge for cloned VM {newid}: {e}")
+            
             clone_type = "Full" if full else "Linked"
             target_node = target if target else node
             
@@ -404,6 +421,8 @@ class VMTools(ProxmoxTool):
                 result_text += f"  • Target Storage: {storage}\n"
             if format:
                 result_text += f"  • Disk Format: {format}\n"
+            if network_bridge:
+                result_text += f"  • Network Bridge: {network_bridge}\n"
                 
             result_text += f"\n🔧 Task ID: {task_result}\n"
             result_text += f"\n✅ VM {newid} is being created on node {target_node}"

@@ -51,9 +51,10 @@ target - Target node for the clone (optional, defaults to source node)
 full - Create a full clone instead of a linked clone (optional, default: true)
 storage - Target storage for the clone (optional)
 format - Target disk format: 'raw', 'qcow2', 'vmdk' (optional)
+network_bridge - New network bridge for the clone (optional)
 
 Example:
-Clone VM 100 to 200: node='pve', vmid='100', newid='200', name='my-clone'"""
+Clone VM 100 to 200: node='pve', vmid='100', newid='200', name='my-clone', network_bridge='vmbr2'"""
 
 EXECUTE_VM_COMMAND_DESC = """Execute commands in a VM via QEMU guest agent.
 
