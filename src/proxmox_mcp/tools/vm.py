@@ -247,30 +247,49 @@ class VMTools(ProxmoxTool):
             if not network_bridge:
                 network_bridge = "vmbr0"
             
-            # Prepare VM configuration
-            vm_config = {
+            # Prepare skeleton VM configuration (basic resources only)
+            vm_skeleton = {
                 "vmid": vmid,
                 "name": name,
                 "cores": cpus,
                 "memory": memory,
                 "ostype": ostype,
                 "scsihw": "virtio-scsi-pci",
-                "boot": "order=scsi0",
-                "agent": "1",  # Enable QEMU guest agent
+            }
+            
+            # Create the skeleton VM
+            task_result = self.proxmox.nodes(node).qemu.create(**vm_skeleton)
+            
+            # Wait for creation task to complete (to avoid initial lock)
+            self._wait_for_task(node, task_result)
+            
+            # Prepare full device configuration
+            full_config = {
+                "agent": "1",
                 "vga": "std",
                 "net0": f"virtio,bridge={network_bridge}",
             }
             
-            # Handle ISO mounting
-            if iso:
-                vm_config["ide2"] = f"{iso},media=cdrom"
-                vm_config["boot"] = "order=ide2;scsi0"  # Boot from CD-ROM first
-            
             # Add storage configuration
-            vm_config.update(vm_config_storage)
+            full_config.update(vm_config_storage)
             
-            # Create the VM
-            task_result = self.proxmox.nodes(node).qemu.create(**vm_config)
+            # Handle ISO mounting and boot order
+            if iso:
+                full_config["ide2"] = f"{iso},media=cdrom"
+                full_config["boot"] = "order=ide2;scsi0"
+            else:
+                full_config["boot"] = "order=scsi0"
+                
+            # Apply full configuration
+            import time
+            time.sleep(1) # Small extra buffer
+            try:
+                self.proxmox.nodes(node).qemu(vmid).config.post(**full_config)
+            except Exception as e:
+                self.logger.error(f"Failed to apply devices to VM {vmid}: {e}")
+                # Retry once after a longer delay if it failed (likely a persistent lock)
+                time.sleep(3)
+                self.proxmox.nodes(node).qemu(vmid).config.post(**full_config)
             
             cloudinit_note = ""
             if storage_type in ["lvm", "lvmthin"]:

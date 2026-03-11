@@ -104,3 +104,30 @@ class ProxmoxTool:
             raise ValueError(f"Invalid input: {error_msg}")
         
         raise RuntimeError(f"Failed to {operation}: {error_msg}")
+
+    def _wait_for_task(self, node: str, upid: str, timeout: int = 60, interval: int = 1) -> bool:
+        """Wait for a Proxmox task to complete.
+
+        Args:
+            node: Node where the task is running
+            upid: Task UPID
+            timeout: Maximum time to wait in seconds
+            interval: Polling interval in seconds
+
+        Returns:
+            bool: True if task completed successfully, False otherwise
+        """
+        import time
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            try:
+                status = self.proxmox.nodes(node).tasks(upid).status.get()
+                if status.get("status") == "stopped":
+                    return status.get("exitstatus") == "OK"
+            except Exception as e:
+                self.logger.warning(f"Error checking task status {upid}: {e}")
+            
+            time.sleep(interval)
+        
+        self.logger.warning(f"Timeout waiting for task {upid} to complete")
+        return False
