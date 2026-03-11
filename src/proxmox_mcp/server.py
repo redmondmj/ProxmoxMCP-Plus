@@ -143,12 +143,13 @@ class ProxmoxMCPServer:
             cpus: Annotated[int, Field(description="Number of CPU cores (e.g. 1, 2, 4)", ge=1, le=32)],
             memory: Annotated[int, Field(description="Memory size in MB (e.g. 2048 for 2GB)", ge=512, le=131072)],
             disk_size: Annotated[int, Field(description="Disk size in GB (e.g. 10, 20, 50)", ge=5, le=1000)],
+            iso: Annotated[Optional[str], Field(description="ISO image to mount (e.g. 'local:iso/ubuntu-22.04.iso')", default=None)] = None,
             storage: Annotated[Optional[str], Field(description="Storage name (optional, will auto-detect)", default=None)] = None,
             ostype: Annotated[Optional[str], Field(description="OS type (optional, default: 'l26' for Linux)", default=None)] = None,
             network_bridge: Annotated[Optional[str], Field(description="Network bridge name (optional, default: 'vmbr0')", default=None)] = None,
         ):
             return self.vm_tools.create_vm(
-                node, vmid, name, cpus, memory, disk_size, storage, ostype, network_bridge
+                node, vmid, name, cpus, memory, disk_size, iso, storage, ostype, network_bridge
             )
 
         @self.mcp.tool(description=CLONE_VM_DESC)

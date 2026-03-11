@@ -329,6 +329,7 @@ Create a new virtual machine with specified resources.
 - `cpus` (integer, required): Number of CPU cores (1-32)
 - `memory` (integer, required): Memory in MB (512-131072)
 - `disk_size` (integer, required): Disk size in GB (5-1000)
+- `iso` (string, optional): ISO image to mount (e.g. 'local:iso/ubuntu-22.04.iso')
 - `storage` (string, optional): Storage pool name
 - `ostype` (string, optional): OS type (default: l26)
 
@@ -343,7 +344,8 @@ Content-Type: application/json
     "name": "my-vm",
     "cpus": 1,
     "memory": 2048,
-    "disk_size": 10
+    "disk_size": 10,
+    "iso": "local:iso/ubuntu-22.04-live-server-amd64.iso"
 }
 ```
 

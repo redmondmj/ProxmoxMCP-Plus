@@ -142,6 +142,7 @@ class VMTools(ProxmoxTool):
         cpus: int,
         memory: int,
         disk_size: int,
+        iso: Optional[str] = None,
         storage: Optional[str] = None,
         ostype: Optional[str] = None,
         network_bridge: Optional[str] = None,
@@ -155,6 +156,7 @@ class VMTools(ProxmoxTool):
             cpus: Number of CPU cores (e.g., 1, 2, 4)
             memory: Memory size in MB (e.g., 2048 for 2GB)
             disk_size: Disk size in GB (e.g., 10, 20, 50)
+            iso: ISO image to mount (e.g., 'local:iso/ubuntu-22.04.iso')
             storage: Storage name (e.g., 'local-lvm', 'vm-storage'). If None, will auto-detect
             ostype: OS type (e.g., 'l26' for Linux, 'win10' for Windows). Default: 'l26'
             network_bridge: Network bridge name (e.g., 'vmbr0'). If None, defaults to 'vmbr0'
@@ -224,8 +226,13 @@ class VMTools(ProxmoxTool):
                 disk_format = "qcow2"
                 vm_config_storage = {
                     "scsi0": f"{storage}:{disk_size},format={disk_format}",
-                    "ide2": f"{storage}:cloudinit",
                 }
+                
+                # Cloud-init location: if we have an ISO on ide2, use ide1
+                if iso:
+                    vm_config_storage["ide1"] = f"{storage}:cloudinit"
+                else:
+                    vm_config_storage["ide2"] = f"{storage}:cloudinit"
             else:
                 # Default to raw for unknown storage types
                 disk_format = "raw"
@@ -253,6 +260,11 @@ class VMTools(ProxmoxTool):
                 "vga": "std",
                 "net0": f"virtio,bridge={network_bridge}",
             }
+            
+            # Handle ISO mounting
+            if iso:
+                vm_config["ide2"] = f"{iso},media=cdrom"
+                vm_config["boot"] = "order=ide2;scsi0"  # Boot from CD-ROM first
             
             # Add storage configuration
             vm_config.update(vm_config_storage)
