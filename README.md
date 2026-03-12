@@ -130,27 +130,6 @@ Before starting, ensure you have:
    python -c "import proxmox_mcp; print('Installation OK')"
    ```
 
-### Option 3: MCP Bundle (.mcpb) - Recommended for MCP Hubs
-
-This project supports the `.mcpb` (MCP Bundle) format for easy, one-click distribution and installation on compatibles hubs (like the [MCP Hub](https://github.com/mcp-hub/mcp-hub)).
-
-1. **Download**: Download the `ProxmoxMCP-Plus.mcpb` file from the releases page (once available).
-2. **Upload**: Upload the file directly to your MCP Hub.
-3. **Configure**: Set the following environment variables in your Hub's UI:
-   - `PROXMOX_HOST`: Proxmox server IP/Hostname (Required)
-   - `PROXMOX_USER`: Username (e.g., `root@pam`) (Required)
-   - `PROXMOX_TOKEN_NAME`: API Token Name (Required)
-   - `PROXMOX_TOKEN_VALUE`: API Token Value (Required)
-   - `PROXMOX_PORT`: API Port (Default: `8006`)
-   - `PROXMOX_VERIFY_SSL`: Set to `true` or `false` (Default: `false`)
-   - `PROXMOX_SERVICE`: Service type (Default: `PVE`)
-   - `LOG_LEVEL`: Set to `INFO` or `DEBUG` (Default: `INFO`)
-4. **Execution Settings**:
-   - **Command**: `python3`
-   - **Arguments**: `${__dirname}/main.py`
-
-The bundle is self-bootstrapping and will automatically install required dependencies on its first run.
-
 ### Verifying Installation
 
 1. Check Python environment:
@@ -1078,7 +1057,9 @@ When running `ProxmoxMCP-Plus` via Docker Compose, the HTTP service exposed on p
 
 ### Sandbox and Development Use
 
-**⚠️ IMPORTANT DISCLAIMER:** ProxmoxMCP Plus is currently **unsupported** and is strictly recommended for use in **sandbox, lab, or development environments only**. It is NOT intended for production deployment.
+**⚠️ IMPORTANT DISCLAIMER:** ProxmoxMCP Plus is currently **unsupported** and is strictly recommended for use in **sandbox, lab, or development environments only**. It is NOT intended for production deployment. 
+
+For enhanced data privacy and security compliance, it is highly recommended to use this server with a **local LLM** (e.g., via LM Studio, Ollama, or LocalAI) rather than a cloud-hosted provider.
 
 The system supports natural language VM creation requests through AI assistants. When a user requests VM creation (e.g., "create a VM with 1 cpu core and 2 GB ram with 10GB of storage disk"), the system will:
 
