@@ -27,7 +27,7 @@ This project is built upon the open-source project [ProxmoxMCP](https://github.c
 | **ISO and Template Management** | Manage installation media and templates | `list_isos`, `list_templates`, `download_iso`, `delete_iso` |
 | **Monitoring** | Cluster and resource monitoring | `get_nodes`, `get_node_status`, `get_vms`, `get_storage`, `get_cluster_status` |
 | **OpenAPI Integration** | REST API endpoints for external integration | 20+ API endpoints |
-| **Security and Stability** | Production-grade error handling and validation | Token-based authentication, comprehensive logging |
+| **Security and Stability** | Robust error handling and validation | Token-based authentication, comprehensive logging |
 
 ## Built With
 
@@ -195,7 +195,7 @@ your `proxmox-config/config.json`:
 - `SSE`: Serve MCP over Server-Sent Events (SSE).
 - `STREAMABLE`: Serve MCP over streamable HTTP.
 
-### OpenAPI Deployment (Production Ready)
+### OpenAPI Deployment (Sandbox Ready)
 
 Deploy ProxmoxMCP Plus as standard OpenAPI REST endpoints for integration with Open WebUI and other applications.
 
@@ -978,7 +978,7 @@ curl -X POST "http://your-server:8811/create_vm" \
   }'
 ```
 
-## Production Security
+## Environment Security
 
 ### API Key Authentication
 Set up secure API access:
@@ -1076,9 +1076,11 @@ When running `ProxmoxMCP-Plus` via Docker Compose, the HTTP service exposed on p
 - [x] Error Handling & Validation
 - [x] Complete Documentation & Testing
 
-### Production Readiness
+### Sandbox and Development Use
 
-ProxmoxMCP Plus is ready for production deployment. The system supports natural language VM creation requests through AI assistants. When a user requests VM creation (e.g., "create a VM with 1 cpu core and 2 GB ram with 10GB of storage disk"), the system will:
+**⚠️ IMPORTANT DISCLAIMER:** ProxmoxMCP Plus is currently **unsupported** and is strictly recommended for use in **sandbox, lab, or development environments only**. It is NOT intended for production deployment.
+
+The system supports natural language VM creation requests through AI assistants. When a user requests VM creation (e.g., "create a VM with 1 cpu core and 2 GB ram with 10GB of storage disk"), the system will:
 
 1. Call the `create_vm` API endpoint
 2. Automatically select appropriate storage and format
@@ -1107,4 +1109,4 @@ MIT License
 
 ---
 
-ProxmoxMCP Plus with OpenAPI integration is ready for production deployment.
+ProxmoxMCP Plus with OpenAPI integration is intended for experimental and educational use in sandbox environments.
