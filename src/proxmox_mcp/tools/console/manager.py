@@ -196,16 +196,15 @@ class VMConsoleManager:
             # Create VNC proxy
             vnc_data = self.proxmox.nodes(node).qemu(vmid).vncproxy.post()
             
-            # Construct the noVNC URL
-            # Note: host comes from the API connection info
-            host = self.proxmox._store["host"]
-            port = self.proxmox._store.get("port", 8006)
+            # Extract host and port from the backend base_url
+            import urllib.parse
+            parsed_url = urllib.parse.urlparse(self.proxmox._backend.base_url)
+            host_port = parsed_url.netloc
             
             # Proxmox URL format for noVNC
-            # https://{host}:{port}/?console=kvm&novnc=1&node={node}&vmid={vmid}&ticket={ticket}
-            import urllib.parse
+            # https://{host_port}/?console=kvm&novnc=1&node={node}&vmid={vmid}&ticket={ticket}
             ticket_encoded = urllib.parse.quote(vnc_data["ticket"])
-            console_url = f"https://{host}:{port}/?console=kvm&novnc=1&node={node}&vmid={vmid}&ticket={ticket_encoded}"
+            console_url = f"https://{host_port}/?console=kvm&novnc=1&node={node}&vmid={vmid}&ticket={ticket_encoded}"
             
             return {
                 "success": True,
