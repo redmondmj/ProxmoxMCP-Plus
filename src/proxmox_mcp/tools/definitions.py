@@ -66,6 +66,24 @@ command* - Shell command to run (e.g. 'uname -a')
 Example:
 {"success": true, "output": "Linux vm1 5.4.0", "exit_code": 0}"""
 
+GET_VNC_CONSOLE_DESC = """Generate a signed noVNC console URL for a VM.
+
+Parameters:
+node* - Host node name (e.g. 'pve')
+vmid* - VM ID number (e.g. '100')
+
+Example:
+get_vnc_console node='pve' vmid='100'"""
+
+GET_SPICE_CONFIG_DESC = """Generate a SPICE configuration (.vv file) for a VM.
+
+Parameters:
+node* - Host node name (e.g. 'pve')
+vmid* - VM ID number (e.g. '100')
+
+Example:
+get_spice_config node='pve' vmid='100'"""
+
 # VM Power Management tool descriptions
 START_VM_DESC = """Start a virtual machine.
 

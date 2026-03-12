@@ -44,6 +44,8 @@ from proxmox_mcp.tools.definitions import (
     CREATE_VM_DESC,
     CLONE_VM_DESC,
     EXECUTE_VM_COMMAND_DESC,
+    GET_VNC_CONSOLE_DESC,
+    GET_SPICE_CONFIG_DESC,
     START_VM_DESC,
     STOP_VM_DESC,
     SHUTDOWN_VM_DESC,
@@ -175,6 +177,20 @@ class ProxmoxMCPServer:
             command: Annotated[str, Field(description="Shell command to run (e.g. 'uname -a', 'systemctl status nginx')")]
         ):
             return await self.vm_tools.execute_command(node, vmid, command)
+
+        @self.mcp.tool(description=GET_VNC_CONSOLE_DESC)
+        def get_vnc_console(
+            node: Annotated[str, Field(description="Host node name (e.g. 'pve')")],
+            vmid: Annotated[str, Field(description="VM ID number (e.g. '100')")],
+        ):
+            return self.vm_tools.get_vnc_console(node, vmid)
+
+        @self.mcp.tool(description=GET_SPICE_CONFIG_DESC)
+        def get_spice_config(
+            node: Annotated[str, Field(description="Host node name (e.g. 'pve')")],
+            vmid: Annotated[str, Field(description="VM ID number (e.g. '100')")],
+        ):
+            return self.vm_tools.get_spice_config(node, vmid)
 
         # VM Power Management tools
         @self.mcp.tool(description=START_VM_DESC)

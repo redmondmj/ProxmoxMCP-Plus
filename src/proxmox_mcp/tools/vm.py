@@ -18,7 +18,12 @@ detailed VM information might be temporarily unavailable.
 from typing import List, Optional
 from mcp.types import TextContent as Content
 from proxmox_mcp.tools.base import ProxmoxTool
-from proxmox_mcp.tools.definitions import GET_VMS_DESC, EXECUTE_VM_COMMAND_DESC
+from proxmox_mcp.tools.definitions import (
+    GET_VMS_DESC, 
+    EXECUTE_VM_COMMAND_DESC,
+    GET_VNC_CONSOLE_DESC,
+    GET_SPICE_CONFIG_DESC
+)
 from proxmox_mcp.tools.console.manager import VMConsoleManager
 
 class VMTools(ProxmoxTool):
@@ -605,6 +610,73 @@ class VMTools(ProxmoxTool):
             return [Content(type="text", text=formatted)]
         except Exception as e:
             self._handle_error(f"execute command on VM {vmid}", e)
+
+    def get_vnc_console(self, node: str, vmid: str) -> List[Content]:
+        """Generate a signed noVNC console URL for a VM.
+
+        Args:
+            node: Host node name
+            vmid: VM ID
+
+        Returns:
+            List of Content objects containing the noVNC URL and details
+        """
+        try:
+            result = self.console_manager.get_vnc_console(node, vmid)
+            result_text = f"""🖥️ noVNC Console Generated!
+
+📋 Details:
+  • VM ID: {vmid}
+  • Node: {node}
+  • User: {result['user']}
+  • Port: {result['port']}
+
+🔗 Console URL:
+{result['url']}
+
+✅ Click the link above to open the console in your browser.
+Note: You may need to accept the self-signed certificate if prompted."""
+            
+            return [Content(type="text", text=result_text)]
+        except Exception as e:
+            self._handle_error(f"generate VNC console for VM {vmid}", e)
+
+    def get_spice_config(self, node: str, vmid: str) -> List[Content]:
+        """Generate a SPICE configuration (.vv file) for a VM.
+
+        Args:
+            node: Host node name
+            vmid: VM ID
+
+        Returns:
+            List of Content objects containing the .vv file content
+        """
+        try:
+            result = self.console_manager.get_spice_config(node, vmid)
+            
+            # Save to a temporary file in the workspace for convenience
+            filename = f"vm_{vmid}_console.vv"
+            with open(filename, "w") as f:
+                f.write(result["vv_content"])
+            
+            result_text = f"""📺 SPICE Configuration Generated!
+
+📋 Details:
+  • VM ID: {vmid}
+  • Node: {node}
+  • Connection: {result['details'].get('host')}:{result['details'].get('proxy') or result['details'].get('port')}
+
+📄 .vv File Content:
+```ini
+{result["vv_content"]}
+```
+
+✅ Configuration has been saved to: {filename}
+Open this file with Virt-Viewer (Remote Viewer) to access the console."""
+            
+            return [Content(type="text", text=result_text)]
+        except Exception as e:
+            self._handle_error(f"generate SPICE config for VM {vmid}", e)
 
     def delete_vm(self, node: str, vmid: str, force: bool = False) -> List[Content]:
         """Delete/remove a virtual machine completely.

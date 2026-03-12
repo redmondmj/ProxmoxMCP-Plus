@@ -785,6 +785,40 @@ Execute a command in a VM's console using QEMU Guest Agent.
 - VM must be running
 - QEMU Guest Agent must be installed and running in the VM
 
+#### get_vnc_console 🆕
+Generate a signed noVNC console URL for web-based access.
+
+**Parameters:**
+- `node` (string, required): Host node name
+- `vmid` (string, required): VM ID number
+
+**API Endpoint:** `POST /get_vnc_console`
+
+**Example Response:**
+```
+🖥️ noVNC Console Generated!
+
+🔗 Console URL:
+https://172.16.144.11:8006/?console=kvm&novnc=1&node=pve&vmid=100&ticket=PVE%3A...
+```
+
+#### get_spice_config 🆕
+Generate a SPICE configuration (.vv file) for Virt-Viewer access.
+
+**Parameters:**
+- `node` (string, required): Host node name
+- `vmid` (string, required): VM ID number
+
+**API Endpoint:** `POST /get_spice_config`
+
+**Example Response:**
+```
+📺 SPICE Configuration Generated!
+
+✅ Configuration has been saved to: vm_100_console.vv
+Open this file with Virt-Viewer to access the console.
+```
+
 #### execute_container_command 🆕
 Execute a shell command inside a running LXC container.
 

@@ -178,3 +178,79 @@ class VMConsoleManager:
             if "not found" in str(e).lower():
                 raise ValueError(f"VM {vmid} not found on node {node}")
             raise RuntimeError(f"Failed to execute command: {str(e)}")
+
+    def get_vnc_console(self, node: str, vmid: str) -> Dict[str, Any]:
+        """Generate a noVNC console ticket and proxy information.
+
+        Args:
+            node: Host node name
+            vmid: VM ID
+
+        Returns:
+            Dictionary containing VNC proxy details and a signed URL
+        """
+        try:
+            # Check if VM exists
+            self.proxmox.nodes(node).qemu(vmid).status.current.get()
+            
+            # Create VNC proxy
+            vnc_data = self.proxmox.nodes(node).qemu(vmid).vncproxy.post()
+            
+            # Construct the noVNC URL
+            # Note: host comes from the API connection info
+            host = self.proxmox._store["host"]
+            port = self.proxmox._store.get("port", 8006)
+            
+            # Proxmox URL format for noVNC
+            # https://{host}:{port}/?console=kvm&novnc=1&node={node}&vmid={vmid}&ticket={ticket}
+            import urllib.parse
+            ticket_encoded = urllib.parse.quote(vnc_data["ticket"])
+            console_url = f"https://{host}:{port}/?console=kvm&novnc=1&node={node}&vmid={vmid}&ticket={ticket_encoded}"
+            
+            return {
+                "success": True,
+                "url": console_url,
+                "ticket": vnc_data["ticket"],
+                "port": vnc_data["port"],
+                "user": vnc_data["user"]
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to generate VNC console for VM {vmid}: {e}")
+            raise RuntimeError(f"Could not generate VNC console: {e}")
+
+    def get_spice_config(self, node: str, vmid: str) -> Dict[str, Any]:
+        """Generate a SPICE console configuration (.vv file content).
+
+        Args:
+            node: Host node name
+            vmid: VM ID
+
+        Returns:
+            Dictionary containing SPICE proxy details and .vv file content
+        """
+        try:
+            # Check if VM exists
+            self.proxmox.nodes(node).qemu(vmid).status.current.get()
+            
+            # Create SPICE proxy
+            spice_data = self.proxmox.nodes(node).qemu(vmid).spiceproxy.post()
+            
+            # Generate the .vv file content
+            vv_content = "[virt-viewer]\n"
+            for key, value in spice_data.items():
+                vv_content += f"{key}={value}\n"
+            
+            # Add some helpful fields if missing
+            if "title" not in spice_data:
+                vv_content += f"title=VM {vmid} Console\n"
+            
+            return {
+                "success": True,
+                "vv_content": vv_content,
+                "details": spice_data
+            }
+        except Exception as e:
+            self.logger.error(f"Failed to generate SPICE config for VM {vmid}: {e}")
+            if "spice" in str(e).lower():
+                raise ValueError(f"SPICE is not enabled for VM {vmid}. Check Display setting in Proxmox.")
+            raise RuntimeError(f"Could not generate SPICE config: {e}")
